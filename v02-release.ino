@@ -9,23 +9,30 @@
 
 #include "DIPSwitch10.h"
 #include "dmx_constants.h"
+#include "led_constants.h"
 
+#define LOOP_DELAY 2
 
 DIPSwitch10 dipSwitch10;
+
 DmxInput dmx;
 volatile uint8_t dmxBuffer[dmxChannelCount];
 uint16_t dmxStartChannel;
 
+Adafruit_NeoPXL8 leds(ledCount, ledPins, ledPixelType);
+
 
 void setup() {
-    Serial.begin();
-
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
 
     dipSwitch10.initPins(1, 10);
 
-    dmx.begin(dmxRxGPIO, 0, dmxChannelCount);
+    leds.begin();
+    leds.setBrightness(255);
+    leds.clear();
+
+    dmx.begin(dmxRxGPIO, 0, dmxChannelCount); // FIXME: read channel !
     dmx.read_async(dmxBuffer, dmxDataRecevied);
 }
 
@@ -33,14 +40,29 @@ void setup() {
 void loop() {
     dipSwitch10.read();
 
+    // Demo -----------------------------------
     if (dipSwitch10.isDemoMode()) {
-        Serial.println(dipSwitch10.demoCurrentColor());
-    
+        leds.fill(dipSwitch10.demoCurrentColor(), 0, ledCount);
+
+    // Dmx ------------------------------------
     } else {
-        Serial.println(dipSwitch10.value());
+        leds.clear();
+        dmxStartChannel = dipSwitch10.value();
+        if (dmxStartChannel == 0) {
+          delay(LOOP_DELAY);
+          return;
+        }
+
+        //
+        // ACTUAL CODE HERE
+        //
     }
 
-        delay(200);
+    if( leds.canShow() ) {
+        leds.show();
+    }
+
+    delay(LOOP_DELAY);
 }
 
 
