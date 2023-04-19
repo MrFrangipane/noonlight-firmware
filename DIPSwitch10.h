@@ -1,16 +1,7 @@
 #ifndef V02_RELEASE_DIPSWITCH10_H
 #define V02_RELEASE_DIPSWITCH10_H
 
-#include <Arduino.h>
-
-
-enum demoColor {
-    red,
-    green,
-    blue,
-    white
-};
-
+#include "Color.h"
 
 class DIPSwitch10 {
 private:
@@ -21,8 +12,9 @@ private:
 public:
     void initPins(int startPin_, int endPin_);
     void read();
+    uint16_t value();
     bool isDemoMode();
-    demoColor demoCurrentColor();
+    color_int demoCurrentColor();
 };
 
 #endif //V02_RELEASE_DIPSWITCH10_H

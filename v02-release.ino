@@ -1,9 +1,6 @@
 // NOON Light
-//
 // RP2040 (RPi Pico), DMX receiver, SK6812 (WS2812B) Fixture Controller
-//
 // for PCB v2 03/2023
-//
 // Libraries used: Adafruit NeoPXL8, PicoDMX
 #include <Arduino.h>
 
@@ -36,9 +33,14 @@ void setup() {
 void loop() {
     dipSwitch10.read();
 
-    Serial.println(dipSwitch10.isDemoMode());
+    if (dipSwitch10.isDemoMode()) {
+        Serial.println(dipSwitch10.demoCurrentColor());
+    
+    } else {
+        Serial.println(dipSwitch10.value());
+    }
 
-    delay(200);
+        delay(200);
 }
 
 

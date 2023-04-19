@@ -3,3 +3,6 @@ _documentation/
 .notes.txt
 
 .idea/
+
+CMakeLists.txt
+cmake-*
