@@ -7,7 +7,9 @@
 #include <DmxInput.h>
 #include <Adafruit_NeoPXL8.h>
 
+#include "Color.h"
 #include "DIPSwitch10.h"
+#include "Renderer.h"
 #include "dmx_constants.h"
 #include "led_constants.h"
 
@@ -21,6 +23,7 @@ uint16_t dmxStartChannel;
 
 Adafruit_NeoPXL8 leds(ledCount, ledPins, ledPixelType);
 
+Renderer renderer(ledCount);
 
 void setup() {
     pinMode(LED_BUILTIN, OUTPUT);
@@ -31,8 +34,11 @@ void setup() {
     leds.begin();
     leds.setBrightness(255);
     leds.clear();
+    if( leds.canShow() ) {
+        leds.show();
+    }
 
-    dmx.begin(dmxRxGPIO, 0, dmxChannelCount); // FIXME: read channel !
+    dmx.begin(dmxRxGPIO, 0, dmxChannelCount); // FIXME: read DIP channel
     dmx.read_async(dmxBuffer, dmxDataRecevied);
 }
 
@@ -55,7 +61,15 @@ void loop() {
 
         //
         // ACTUAL CODE HERE
-        //
+        double a = (cos(static_cast<double>(millis()) / 2500) + 1) / 2;
+        double b = (cos(static_cast<double>(millis()) / 50) + 1) / 2;
+
+        renderer.clear();
+        renderer.segment(120.0, 1.0, 1.0, a * 0.2, b * 0.6 + 0.2);
+
+        for (int i = 0; i < ledCount; i++) {
+            leds.setPixelColor(i, renderer.pixels[i]);
+        }
     }
 
     if( leds.canShow() ) {
