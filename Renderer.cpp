@@ -21,23 +21,58 @@ void Renderer::fill(color_int color) {
 
 
 void Renderer::segment(double h, double s, double v, double start, double end) {
-    color_int color = Color::fromHSV(h, s, v);
+    int startLed;
+    int endLed;
+    int steps;
 
-    double d_startLed = start * pixelCount;
-    double d_endLed = end * pixelCount;
-
-    int i_startLed = (int)trunc(d_startLed);
-    int i_endLed = (int)trunc(d_endLed);
-
-    if (i_startLed > 0) {
-        pixels[i_startLed - 1] = Color::fromHSV(h, s, 1 - v * (d_startLed - i_startLed));
+    if (start < end) {
+        startLed = (int)(start * pixelCount);
+        endLed = (int)(end * pixelCount);
+    } else {
+        startLed = (int)(end * pixelCount);
+        endLed = (int)(start * pixelCount);
     }
 
-    if (i_endLed < pixelCount) {
-        pixels[i_endLed + 1] = Color::fromHSV(h, s, v * (d_endLed - i_endLed));
+    steps = endLed - startLed;
+    if (steps == 0) {
+        return;
     }
 
-    for (int i=i_startLed; i<=d_endLed; i++) {
-        pixels[i] = color;
+    for (int i = 0; i < steps + 1; i++) {
+        pixels[startLed + i] = Color::fromHSV(h, s, v);
+    }
+}
+
+
+void Renderer::gradient(double h, double s, double v, double start, double end) {
+    int startLed;
+    int endLed;
+    int steps;
+
+    double vStart;
+    double vEnd;
+
+    if (start < end) {
+        vStart = v;
+        vEnd = 0.0;
+
+        startLed = (int)(start * pixelCount);
+        endLed = (int)(end * pixelCount);
+    } else {
+        vStart = 0.0;
+        vEnd = v;
+
+        startLed = (int)(end * pixelCount);
+        endLed = (int)(start * pixelCount);
+    }
+
+    steps = endLed - startLed;
+    if (steps == 0) {
+        return;
+    }
+
+
+    for (int i = 0; i < steps + 1; i++) {
+        pixels[startLed + i] = Color::fromHSV(h, s, (vStart + (vEnd - vStart) * (double)i / (double)steps));
     }
 }

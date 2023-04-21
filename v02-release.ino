@@ -62,10 +62,10 @@ void loop() {
         //
         // ACTUAL CODE HERE
         double a = (cos(static_cast<double>(millis()) / 2500) + 1) / 2;
-        double b = (cos(static_cast<double>(millis()) / 50) + 1) / 2;
 
         renderer.clear();
-        renderer.segment(120.0, 1.0, 1.0, a * 0.2, b * 0.6 + 0.2);
+        renderer.segment(120.0, 0.0, .25, 0.5, a);
+        renderer.segment(120.0, 0.0, .25, 0.5, 1 - a);
 
         for (int i = 0; i < ledCount; i++) {
             leds.setPixelColor(i, renderer.pixels[i]);

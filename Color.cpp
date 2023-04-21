@@ -41,6 +41,10 @@ color_int Color::fromRGB(uint8_t r, uint8_t g, uint8_t b) {
 color_int Color::fromHSV(double h, double s, double v) {
     double r = 0, g = 0, b = 0;
 
+    if (v > 0.0 && v < 0.01) {
+        v = max(0.004, pow(v, 2.2));
+    }
+
     if (s == 0)
     {
         r = v;

@@ -13,6 +13,7 @@ public:
     void clear();
     void fill(color_int color);
     void segment(double h, double s, double v, double start, double end);
+    void gradient(double h, double s, double v, double start, double end);
 };
 
 
