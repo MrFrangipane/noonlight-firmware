@@ -2,30 +2,30 @@
 // RP2040 (RPi Pico), DMX receiver, SK6812 (WS2812B) Fixture Controller
 // for PCB v2 03/2023
 // Libraries used: Adafruit NeoPXL8, PicoDMX
-#include <Arduino.h>
-
 #include <DmxInput.h>
 #include <Adafruit_NeoPXL8.h>
 
 #include "Color.h"
 #include "DIPSwitch10.h"
 #include "Renderer.h"
+#include "oscillator.h"
 #include "dmx_constants.h"
 #include "led_constants.h"
 
 #define LOOP_DELAY 2
 
 DIPSwitch10 dipSwitch10;
-
 DmxInput dmx;
-volatile uint8_t dmxBuffer[dmxChannelCount];
-uint16_t dmxStartChannel;
-
+DmxStatus dmxStatus;
+volatile uint8_t dmxBuffer[512];
+Oscillator oscillator;
+Renderer renderer(ledCount);
 Adafruit_NeoPXL8 leds(ledCount, ledPins, ledPixelType);
 
-Renderer renderer(ledCount);
 
 void setup() {
+    Serial.begin();
+
     pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, HIGH);
 
@@ -38,7 +38,7 @@ void setup() {
         leds.show();
     }
 
-    dmx.begin(dmxRxGPIO, 0, dmxChannelCount); // FIXME: read DIP channel
+    dmx.begin(dmxRxGPIO, 1, 512);
     dmx.read_async(dmxBuffer, dmxDataRecevied);
 }
 
@@ -53,19 +53,26 @@ void loop() {
     // Dmx ------------------------------------
     } else {
         leds.clear();
-        dmxStartChannel = dipSwitch10.value();
-        if (dmxStartChannel == 0) {
+        dmxStatus.startChannel = dipSwitch10.value();
+        if (dmxStatus.startChannel == 0) {
           delay(LOOP_DELAY);
           return;
         }
 
         //
         // ACTUAL CODE HERE
-        double a = (cos(static_cast<double>(millis()) / 2500) + 1) / 2;
+        dmxStatus.h = (double)dmxBuffer[dmxStatus.startChannel + dmxChH - 1] / 255.0 * 360;
+        dmxStatus.s = (double)dmxBuffer[dmxStatus.startChannel + dmxChS - 1] / 255.0;
+        dmxStatus.v = (double)dmxBuffer[dmxStatus.startChannel + dmxChV - 1] / 255.0;
+        //dmxStatus.program = dmxBuffer[dmxStatus.startChannel + dmxChProg - 1] 
+
+        oscillator.setSpeed((double)dmxBuffer[dmxStatus.startChannel + dmxChParamA - 1] / 255.0);
+        oscillator.step();
 
         renderer.clear();
-        renderer.segment(120.0, 0.0, .25, 0.5, a);
-        renderer.segment(120.0, 0.0, .25, 0.5, 1 - a);
+
+        renderer.segment(dmxStatus.h, dmxStatus.s, dmxStatus.v, 0.5, oscillator.getValue());
+        renderer.segment(dmxStatus.h, dmxStatus.s, dmxStatus.v, 0.5, 1 - oscillator.getValue());
 
         for (int i = 0; i < ledCount; i++) {
             leds.setPixelColor(i, renderer.pixels[i]);
@@ -75,7 +82,6 @@ void loop() {
     if( leds.canShow() ) {
         leds.show();
     }
-
     delay(LOOP_DELAY);
 }
 
