@@ -5,11 +5,15 @@
 class Oscillator {
 private:
     double speed;
-    double stepDelta;
     double phase;
+    double stepDelta;
+    double currentPhase;
     double value;
+    unsigned long lastTimestamp;
 public:
+    Oscillator();
     void setSpeed(double s);
+    void setPhase(double p);
     void step();
     double getValue();
 };

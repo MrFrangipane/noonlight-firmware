@@ -12,6 +12,7 @@
 #include "dmx_constants.h"
 #include "led_constants.h"
 
+
 #define LOOP_DELAY 2
 
 DIPSwitch10 dipSwitch10;
@@ -21,6 +22,8 @@ volatile uint8_t dmxBuffer[512];
 Oscillator oscillator;
 Renderer renderer(ledCount);
 Adafruit_NeoPXL8 leds(ledCount, ledPins, ledPixelType);
+double Color::gamma = 2.5;
+double Color::gammaTreshold = 0.01;  // compute gamma for this HSV Value and up
 
 
 void setup() {
@@ -60,20 +63,70 @@ void loop() {
         }
 
         //
-        // ACTUAL CODE HERE
+        // PARSE DMX
         dmxStatus.h = (double)dmxBuffer[dmxStatus.startChannel + dmxChH - 1] / 255.0 * 360;
         dmxStatus.s = (double)dmxBuffer[dmxStatus.startChannel + dmxChS - 1] / 255.0;
         dmxStatus.v = (double)dmxBuffer[dmxStatus.startChannel + dmxChV - 1] / 255.0;
-        //dmxStatus.program = dmxBuffer[dmxStatus.startChannel + dmxChProg - 1] 
+        switch (dmxBuffer[dmxStatus.startChannel + dmxChProg - 1]) {
+            case 0 ... 85:
+                dmxStatus.program = DmxProgram::SEGMENT;
+                break;
 
-        oscillator.setSpeed((double)dmxBuffer[dmxStatus.startChannel + dmxChParamA - 1] / 255.0);
+            case 86 ... 170:
+                dmxStatus.program = DmxProgram::GRADIENT;
+                break;
+
+            case 171 ... 255:
+                dmxStatus.program = DmxProgram::STROBE;
+                break;
+        }
+        dmxStatus.paramPhase = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamPhase - 1] / 255.0 * 2.0 * 3.1416;
+        dmxStatus.paramSpeed = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamSpeed - 1] / 255.0;
+        dmxStatus.paramOrigin = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamOrigin - 1] / 255.0;
+        dmxStatus.paramWidth = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamWidth - 1] / 255.0;
+
+        //
+        // COMPUTE
+        oscillator.setSpeed(dmxStatus.paramSpeed);
+        oscillator.setPhase(dmxStatus.paramPhase);
         oscillator.step();
 
         renderer.clear();
 
-        renderer.segment(dmxStatus.h, dmxStatus.s, dmxStatus.v, 0.5, oscillator.getValue());
-        renderer.segment(dmxStatus.h, dmxStatus.s, dmxStatus.v, 0.5, 1 - oscillator.getValue());
+        switch (dmxStatus.program) {
+            case DmxProgram::SEGMENT:
+                renderer.segment(
+                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                    dmxStatus.paramOrigin,
+                    dmxStatus.paramOrigin + oscillator.getValue() * dmxStatus.paramWidth
+                );
+                renderer.segment(
+                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                    dmxStatus.paramOrigin,
+                    dmxStatus.paramOrigin - oscillator.getValue() * dmxStatus.paramWidth
+                );
+                break;
 
+            case DmxProgram::GRADIENT:
+                renderer.gradient(
+                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                        dmxStatus.paramOrigin,
+                        dmxStatus.paramOrigin + oscillator.getValue() * dmxStatus.paramWidth
+                );
+                renderer.gradient(
+                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                        dmxStatus.paramOrigin,
+                        dmxStatus.paramOrigin - oscillator.getValue() * dmxStatus.paramWidth
+                );
+                break;
+
+            case DmxProgram::STROBE:
+                renderer.fill(0);
+                break;
+        }
+
+        //
+        // RENDER
         for (int i = 0; i < ledCount; i++) {
             leds.setPixelColor(i, renderer.pixels[i]);
         }
@@ -82,6 +135,7 @@ void loop() {
     if( leds.canShow() ) {
         leds.show();
     }
+
     delay(LOOP_DELAY);
 }
 

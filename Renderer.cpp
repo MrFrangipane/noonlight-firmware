@@ -35,7 +35,8 @@ void Renderer::segment(double h, double s, double v, double start, double end) {
 
     steps = endLed - startLed;
     if (steps == 0) {
-        return;
+        steps = 1;
+        startLed --;
     }
 
     for (int i = 0; i < steps + 1; i++) {
@@ -68,7 +69,8 @@ void Renderer::gradient(double h, double s, double v, double start, double end) 
 
     steps = endLed - startLed;
     if (steps == 0) {
-        return;
+        steps = 1;
+        startLed --;
     }
 
 

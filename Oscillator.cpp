@@ -1,21 +1,37 @@
 #include "Oscillator.h"
 
 #include <Arduino.h>
+#include "helpers.h"
+
+
+Oscillator::Oscillator() {
+    lastTimestamp = 0;
+}
+
 
 void Oscillator::setSpeed(double s) {
     speed = s;
-    stepDelta = pow(speed, 2.2) / 8;
+    stepDelta = pow(speed, 2.2) / 20;
+}
+
+
+void Oscillator::setPhase(double p) {
+    phase = p;
 }
 
 
 void Oscillator::step() {
+    unsigned long elapsed = millis() - lastTimestamp;
+    lastTimestamp = millis();
+
     if (speed != 0.0) {
-        phase += stepDelta;
-        value = cos(phase) * 0.5 + 0.5;
+        currentPhase += stepDelta * (double)elapsed;
+        value = cos(currentPhase + phase) * 0.5 + 0.5;
 
     } else {
-        phase = 0.0;
-        value = 1.0;
+        currentPhase = 0.0;
+        value = cos(currentPhase + phase) * 0.5 + 0.5;
+        printDouble(phase, 100);
     }
 }
 
