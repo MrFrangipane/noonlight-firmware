@@ -69,11 +69,11 @@ void loop() {
         dmxStatus.v = (double)dmxBuffer[dmxStatus.startChannel + dmxChV - 1] / 255.0;
         switch (dmxBuffer[dmxStatus.startChannel + dmxChProg - 1]) {
             case 0 ... 85:
-                dmxStatus.program = DmxProgram::SEGMENT;
+                dmxStatus.program = DmxProgram::GRADIENT;
                 break;
 
             case 86 ... 170:
-                dmxStatus.program = DmxProgram::GRADIENT;
+                dmxStatus.program = DmxProgram::SEGMENT;
                 break;
 
             case 171 ... 255:
@@ -122,6 +122,11 @@ void loop() {
 
             case DmxProgram::STROBE:
                 renderer.fill(0);
+                if (oscillator.getValue() > 0.5) {
+                    renderer.fill(Color::fromHSV(dmxStatus.h, dmxStatus.s, dmxStatus.v));
+                } else {
+                    renderer.fill(0);
+                }
                 break;
         }
 

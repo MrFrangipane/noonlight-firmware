@@ -11,7 +11,7 @@ Oscillator::Oscillator() {
 
 void Oscillator::setSpeed(double s) {
     speed = s;
-    stepDelta = pow(speed, 2.2) / 20;
+    stepDelta = pow(speed, 2.2) / 15;
 }
 
 
