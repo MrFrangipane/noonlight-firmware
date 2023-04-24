@@ -18,10 +18,11 @@ struct DmxStatus {
 
 const byte dmxRxGPIO   = 11;
 
+// enum ?
 const byte dmxChH      = 1;
 const byte dmxChS      = 2;
 const byte dmxChV      = 3;
-const byte dmxChProg   = 4;  // [0:85] SEGMENT - [86:170] GRADIENT - [171:255] STROBE
+const byte dmxChProg   = 4;  // [0:85] GRADIENT - [86:170] SEGMENT - [171:255] STROBE
 const byte dmxChParamPhase = 5;
 const byte dmxChParamSpeed = 6;
 const byte dmxChParamOrigin = 7;

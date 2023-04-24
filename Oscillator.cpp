@@ -31,7 +31,6 @@ void Oscillator::step() {
     } else {
         currentPhase = 0.0;
         value = cos(currentPhase + phase) * 0.5 + 0.5;
-        printDouble(phase, 100);
     }
 }
 

@@ -2,6 +2,7 @@
 // RP2040 (RPi Pico), DMX receiver, SK6812 (WS2812B) Fixture Controller
 // for PCB v2 03/2023
 // Libraries used: Adafruit NeoPXL8, PicoDMX
+// version 0.0.1
 #include <DmxInput.h>
 #include <Adafruit_NeoPXL8.h>
 
@@ -12,8 +13,9 @@
 #include "dmx_constants.h"
 #include "led_constants.h"
 
-
 #define LOOP_DELAY 2
+//#define SERIAL_DMX_DEBUG
+
 
 DIPSwitch10 dipSwitch10;
 DmxInput dmx;
@@ -93,6 +95,14 @@ void loop() {
 
         renderer.clear();
 
+        #ifdef SERIAL_DMX_DEBUG
+        for (int i=0; i < 8; i++) {
+            Serial.print(dmxBuffer[i + dmxStatus.startChannel]); // QLC+ vs OLA ?
+            Serial.print(" ");
+        }
+        #endif
+        
+
         switch (dmxStatus.program) {
             case DmxProgram::SEGMENT:
                 renderer.segment(
@@ -135,6 +145,10 @@ void loop() {
         for (int i = 0; i < ledCount; i++) {
             leds.setPixelColor(i, renderer.pixels[i]);
         }
+
+        #ifdef SERIAL_DMX_DEBUG
+        Serial.println("");
+        #endif
     }
 
     if( leds.canShow() ) {
