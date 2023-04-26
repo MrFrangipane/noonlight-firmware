@@ -97,7 +97,7 @@ void loop() {
 
         #ifdef SERIAL_DMX_DEBUG
         for (int i=0; i < 8; i++) {
-            Serial.print(dmxBuffer[i + dmxStatus.startChannel]); // QLC+ vs OLA ?
+            Serial.print(dmxBuffer[i + dmxStatus.startChannel]);
             Serial.print(" ");
         }
         #endif
