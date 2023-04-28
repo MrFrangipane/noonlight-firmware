@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE FixtureDefinition>
+<FixtureDefinition xmlns="http://www.qlcplus.org/FixtureDefinition">
+ <Creator>
+  <Name>Q Light Controller Plus</Name>
+  <Version>4.12.6</Version>
+  <Author>MrFrangipane</Author>
+ </Creator>
+ <Manufacturer>Frangitron</Manufacturer>
+ <Model>NOON Light</Model>
+ <Type>LED Bar (Pixels)</Type>
+ <Channel Name="Hue" Preset="IntensityHue"/>
+ <Channel Name="Saturation" Preset="IntensitySaturation"/>
+ <Channel Name="Value" Preset="IntensityValue"/>
+ <Channel Name="Program">
+  <Group Byte="0">Nothing</Group>
+  <Capability Min="0" Max="85">Gradient</Capability>
+  <Capability Min="86" Max="170">Segment</Capability>
+  <Capability Min="171" Max="255">Strobe</Capability>
+ </Channel>
+ <Channel Name="Phase">
+  <Group Byte="0">Speed</Group>
+  <Capability Min="0" Max="255">Animation phase (0 - 2Pi)</Capability>
+ </Channel>
+ <Channel Name="Speed">
+  <Group Byte="0">Speed</Group>
+  <Capability Min="0" Max="255">Animation speed</Capability>
+ </Channel>
+ <Channel Name="Origin">
+  <Group Byte="0">Tilt</Group>
+  <Capability Min="0" Max="255">Origin (bottom - top)</Capability>
+ </Channel>
+ <Channel Name="Width">
+  <Group Byte="0">Tilt</Group>
+  <Capability Min="0" Max="255">Width (0 - 2 bar height)</Capability>
+ </Channel>
+ <Channel Name="Fixed Width">
+  <Group Byte="0">Tilt</Group>
+  <Capability Min="0" Max="255">portion of width non affected by animation</Capability>
+ </Channel>
+ <Mode Name="Normal">
+  <Channel Number="0" ActsOn="0">Hue</Channel>
+  <Channel Number="1" ActsOn="1">Saturation</Channel>
+  <Channel Number="2" ActsOn="2">Value</Channel>
+  <Channel Number="3" ActsOn="3">Program</Channel>
+  <Channel Number="4" ActsOn="4">Phase</Channel>
+  <Channel Number="5" ActsOn="5">Speed</Channel>
+  <Channel Number="6" ActsOn="6">Origin</Channel>
+  <Channel Number="7" ActsOn="7">Width</Channel>
+  <Channel Number="8" ActsOn="8">Fixed Width</Channel>
+ </Mode>
+ <Physical>
+  <Bulb Type="" Lumens="0" ColourTemperature="0"/>
+  <Dimensions Weight="0" Width="0" Height="0" Depth="0"/>
+  <Lens Name="Other" DegreesMin="0" DegreesMax="0"/>
+  <Focus Type="Fixed" PanMax="0" TiltMax="0"/>
+  <Technical PowerConsumption="40" DmxConnector="3-pin"/>
+ </Physical>
+</FixtureDefinition>
