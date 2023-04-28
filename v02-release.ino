@@ -2,7 +2,7 @@
 // RP2040 (RPi Pico), DMX receiver, SK6812 (WS2812B) Fixture Controller
 // for PCB v2 03/2023
 // Libraries used: Adafruit NeoPXL8, PicoDMX
-// version 0.0.1
+// version 0.1.0
 #include <DmxInput.h>
 #include <Adafruit_NeoPXL8.h>
 
@@ -82,15 +82,16 @@ void loop() {
                 dmxStatus.program = DmxProgram::STROBE;
                 break;
         }
-        dmxStatus.paramPhase = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamPhase - 1] / 255.0 * 2.0 * 3.1416;
-        dmxStatus.paramSpeed = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamSpeed - 1] / 255.0;
-        dmxStatus.paramOrigin = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamOrigin - 1] / 255.0;
-        dmxStatus.paramWidth = (double)dmxBuffer[dmxStatus.startChannel + dmxChParamWidth - 1] / 255.0;
+        dmxStatus.phase = (double)dmxBuffer[dmxStatus.startChannel + dmxChPhase - 1] / 255.0 * 2.0 * 3.1416;
+        dmxStatus.speed = (double)dmxBuffer[dmxStatus.startChannel + dmxChSpeed - 1] / 255.0;
+        dmxStatus.origin = (double)dmxBuffer[dmxStatus.startChannel + dmxChOrigin - 1] / 255.0;
+        dmxStatus.width = (double)dmxBuffer[dmxStatus.startChannel + dmxChWidth - 1] / 255.0;
+        dmxStatus.fixedWidth = (double)dmxBuffer[dmxStatus.startChannel + dmxChFixedWidth - 1] / 255.0;
 
         //
         // COMPUTE
-        oscillator.setSpeed(dmxStatus.paramSpeed);
-        oscillator.setPhase(dmxStatus.paramPhase);
+        oscillator.setSpeed(dmxStatus.speed);
+        oscillator.setPhase(dmxStatus.phase);
         oscillator.step();
 
         renderer.clear();
@@ -104,29 +105,43 @@ void loop() {
         
 
         switch (dmxStatus.program) {
-            case DmxProgram::SEGMENT:
-                renderer.segment(
-                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
-                    dmxStatus.paramOrigin,
-                    dmxStatus.paramOrigin + oscillator.getValue() * dmxStatus.paramWidth
+            case DmxProgram::GRADIENT:
+                if ( dmxStatus.fixedWidth > 0.0 ) {
+                    renderer.segment(
+                            dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                            dmxStatus.origin - dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                            dmxStatus.origin + dmxStatus.width * dmxStatus.fixedWidth * 0.5
+                    );
+                }
+                renderer.gradient(
+                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                        dmxStatus.origin + dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                        dmxStatus.origin + oscillator.getValue() * dmxStatus.width
                 );
-                renderer.segment(
-                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
-                    dmxStatus.paramOrigin,
-                    dmxStatus.paramOrigin - oscillator.getValue() * dmxStatus.paramWidth
+                renderer.gradient(
+                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                        dmxStatus.origin - dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                        dmxStatus.origin - oscillator.getValue() * dmxStatus.width
                 );
                 break;
 
-            case DmxProgram::GRADIENT:
-                renderer.gradient(
-                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
-                        dmxStatus.paramOrigin,
-                        dmxStatus.paramOrigin + oscillator.getValue() * dmxStatus.paramWidth
+            case DmxProgram::SEGMENT:
+                if ( dmxStatus.fixedWidth > 0.0 ) {
+                    renderer.segment(
+                            dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                            dmxStatus.origin - dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                            dmxStatus.origin + dmxStatus.width * dmxStatus.fixedWidth * 0.5
+                    );
+                }
+                renderer.segment(
+                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                    dmxStatus.origin + dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                    dmxStatus.origin + oscillator.getValue() * dmxStatus.width
                 );
-                renderer.gradient(
-                        dmxStatus.h, dmxStatus.s, dmxStatus.v,
-                        dmxStatus.paramOrigin,
-                        dmxStatus.paramOrigin - oscillator.getValue() * dmxStatus.paramWidth
+                renderer.segment(
+                    dmxStatus.h, dmxStatus.s, dmxStatus.v,
+                    dmxStatus.origin - dmxStatus.width * dmxStatus.fixedWidth * 0.5,
+                    dmxStatus.origin - oscillator.getValue() * dmxStatus.width
                 );
                 break;
 
